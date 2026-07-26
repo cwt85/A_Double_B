@@ -1,0 +1,14 @@
+# Visual Studio 快取/選項資料夾（本機索引，不應版控）
+.vs/
+
+# 編譯輸出
+[Bb]in/
+[Oo]bj/
+
+# 使用者專屬設定
+*.user
+*.suo
+
+# Rider / VS Code
+.idea/
+.vscode/
