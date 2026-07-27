@@ -12,12 +12,6 @@
                 HeightRequest="185"
                 Aspect="AspectFit"
                 SemanticProperties.Description="dot net bot in a submarine number ten" />
-
-            <Label
-                Text="Hello, World!"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1" />
-
             <Label
                 Text="歡迎來到1A2B挑戰"
                 Style="{StaticResource SubHeadline}"
@@ -38,6 +32,14 @@
                 Text="按我開始遊戲" 
                 Clicked="OnPlayClicked"
                 HorizontalOptions="Fill" />
+            
+            <CollectionView ItemsSource="{Binding UserHistory}" IsVisible="True">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding .}" TextColor="White"/>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
         </VerticalStackLayout>
     </ScrollView>
 
