@@ -1,45 +1,59 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ADoubleB.MainPage">
+             x:Class="ADoubleB.MainPage"
+             Title="1A2B">
 
     <ScrollView>
         <VerticalStackLayout
-            Padding="30,0"
-            Spacing="25">
-            <Image
-                Source="dotnet_bot.png"
-                HeightRequest="185"
-                Aspect="AspectFit"
-                SemanticProperties.Description="dot net bot in a submarine number ten" />
+            Padding="24"
+            Spacing="20"
+            MaximumWidthRequest="480"
+            HorizontalOptions="Center">
+
             <Label
-                Text="歡迎來到1A2B挑戰"
-                Style="{StaticResource SubHeadline}"
-                SemanticProperties.HeadingLevel="Level2"
-                SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
+                Text="1A2B 猜數字挑戰"
+                FontSize="24"
+                FontAttributes="Bold"
+                HorizontalOptions="Center" />
+
             <Label
                 x:Name="PlayLabel"
                 Text="點擊下方按鈕開始遊戲"
-                />
+                FontSize="16"
+                HorizontalOptions="Center" />
+
             <Entry
                 x:Name="NumberEntry"
                 Placeholder="請輸入你的數字"
-                IsVisible="False" 
+                IsVisible="False"
                 Keyboard="Numeric"
-                />
+                HorizontalTextAlignment="Center" />
+
             <Button
                 x:Name="PlayButton"
-                Text="按我開始遊戲" 
-                Clicked="OnPlayClicked"
-                HorizontalOptions="Fill" />
-            
-            <CollectionView ItemsSource="{Binding UserHistory}" IsVisible="True">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Label Text="{Binding .}" TextColor="White"/>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                Text="按我開始遊戲"
+                Clicked="OnPlayClicked" />
+
+            <Label
+                Text="遊玩紀錄"
+                FontSize="16"
+                FontAttributes="Bold"
+                Margin="0,10,0,0" />
+
+            <Border StrokeShape="RoundedRectangle 8" Padding="12">
+                <CollectionView ItemsSource="{Binding UserHistory}">
+                    <CollectionView.EmptyView>
+                        <Label Text="尚無紀錄" HorizontalOptions="Center" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Label Text="{Binding .}" Padding="0,4" />
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Border>
+
         </VerticalStackLayout>
     </ScrollView>
 
