@@ -41,7 +41,7 @@
                 FontAttributes="Bold"
                 Margin="0,10,0,0" />
 
-            <Border StrokeShape="RoundedRectangle 8" Padding="12">
+            <Border StrokeShape="RoundRectangle 8" Padding="12">
                 <CollectionView ItemsSource="{Binding UserHistory}">
                     <CollectionView.EmptyView>
                         <Label Text="尚無紀錄" HorizontalOptions="Center" />
@@ -53,6 +53,11 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
             </Border>
+            <Button
+                x:Name="RestartButton"
+                Text="重新開始遊戲"
+                Clicked="OnRestartClicked"
+                IsVisible="False" />
 
         </VerticalStackLayout>
     </ScrollView>

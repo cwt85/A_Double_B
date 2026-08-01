@@ -36,11 +36,12 @@ namespace ADoubleB
             int userNumber = ParseUserNumber();
             tryCount++;
             await CheckUserNumber(userNumber, SystemNumber);
-           
-                
-              
-
-
+        }
+        private void OnRestartClicked(object? sender, EventArgs e)
+        {
+            ClearHistory();
+            RestartButton.IsVisible = false;
+            PlayButton.IsVisible = true;
         }
         /// <summary>
         /// 確認使用者輸入合法數字(數字不得為空、不得重複、必須是四位數數字等)
@@ -136,15 +137,19 @@ namespace ADoubleB
             Debug.WriteLine($"{message}");
             if (aCount == 4)
             {
-                await DisplayAlertAsync("遊玩提示", $"恭喜你答對了，共花了{tryCount}次\n點擊確認重新開始遊戲", "確認");
-                ClearHistory();
-                CreateRandomNumber();
+                await DisplayAlertAsync("遊玩提示", $"恭喜你答對了，共花了{tryCount}次", "確認");
+                SystemNumber = CreateRandomNumber();//重新產生數字
+                RestartButton.IsVisible = true;
+                PlayButton.IsVisible = false;
                 return;
+                
+                
             }
         }
         private void ClearHistory()
         {
             UserHistory.Clear();
+            tryCount = 0;
             NumberEntry.Text = string.Empty;
         }
        
