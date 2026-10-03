@@ -12,3 +12,10 @@
 # Rider / VS Code
 .idea/
 .vscode/
+.claude/
+
+#keystore
+ADoubleB/ADoubleB.keystore
+
+# 本機 Android 簽署密碼
+ADoubleB/Signing.local.props
