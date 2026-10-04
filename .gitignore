@@ -19,3 +19,6 @@ ADoubleB/ADoubleB.keystore
 
 # 本機 Android 簽署密碼
 ADoubleB/Signing.local.props
+
+# 自動發布產生的簽署 AAB
+artifacts/
