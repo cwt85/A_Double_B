@@ -1,6 +1,6 @@
 # Google Play 內部測試自動發布
 
-工作流程：推送 `v1.1.0` 這類標籤 → 安裝 .NET 10 與 MAUI Android → 使用既有上傳金鑰簽署 AAB → 保存 AAB → 上傳 Google Play `internal` 軌道。
+工作流程：推送 `android-v1.1.1` 這類標籤 → 安裝 .NET 10 與 MAUI Android → 使用既有上傳金鑰簽署 AAB → 保存 AAB → 上傳 Google Play `internal` 軌道。
 
 一般 push 不會觸發。工作流程使用 `status: completed`，代表發布給內部測試軌道的測試人員；Google 的處理或審核仍依 Play Console 狀態為準。此流程不會更新商店圖片、隱私權政策、資料安全表單或正式軌道。
 
@@ -46,7 +46,7 @@ $keystorePath = 'C:\Users\user\source\repos\ADoubleB\ADoubleB\ADoubleB.keystore'
 
 先到 Play Console 的 App Bundle 探索工具查看**所有軌道已上傳的最大版本代碼**，將起始值設為至少等於該值。例如最大值為 `1`，可設定為 `1000`。
 
-workflow 的版本代碼 = `PLAY_VERSION_CODE_BASE` + 此 workflow 的 `github.run_number`。起始值 `1000` 的第一次執行即為 `1001`。版本名稱則由 `v1.1.0` 得到 `1.1.0`，不需要每次手動修改 csproj。
+workflow 的版本代碼 = `PLAY_VERSION_CODE_BASE` + 此 workflow 的 `github.run_number`。起始值 `1000` 的第一次執行即為 `1001`。版本名稱則由 `android-v1.1.1` 得到 `1.1.1`，不需要每次手動修改 csproj。
 
 不要降低起始值。未來若另行手動上傳更大的版本代碼、重新命名或重建 workflow，應重新檢查起始值。重跑同一次 workflow 會沿用同一版本代碼；若 AAB 已被 Google 接受，請建立新版本標籤觸發新執行，避免重複代碼。發布標籤請逐次推送，等待上一個流程完成。
 
@@ -56,8 +56,8 @@ workflow 的版本代碼 = `PLAY_VERSION_CODE_BASE` + 此 workflow 的 `github.r
 
 ```powershell
 # 確認目前 commit 就是要發布的版本，且 Secrets／Variable 已設定。
-git tag v1.1.0
-git push origin v1.1.0
+git tag android-v1.1.1
+git push origin android-v1.1.1
 ```
 
 在 GitHub 的 Actions 查看 `Publish Google Play internal test`。成功後到 Play Console 內部測試確認版本，測試完成後手動推進正式發布。上傳失敗時仍可從成功的「Save signed bundle」步驟下載 AAB。
