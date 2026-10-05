@@ -1,0 +1,87 @@
+name: Publish iOS TestFlight
+
+# iOS 標籤獨立觸發，不影響 Android。
+on:
+  push:
+    tags:
+      - 'ios-v*'
+permissions:
+  contents: read
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: macos-26
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Validate configuration
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          RUN_NUMBER: ${{ github.run_number }}
+          BUILD_BASE: ${{ vars.IOS_BUILD_NUMBER_BASE || '0' }}
+          IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
+          IOS_KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+        run: python3 scripts/ios-release.py metadata
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: '10.0.401'
+
+      - name: Select compatible Xcode
+        uses: maxim-lobanov/setup-xcode@1242409711ff5721add51979e9e11e23ebb7e5a4 # v1
+        with:
+          xcode-version: '26.6'
+
+      - name: Install MAUI iOS
+        # 此 workload set 與 Xcode 26.6 配對，避免自動升級到要求新版 Xcode 的 SDK。
+        run: dotnet workload install maui-ios --version 10.0.401
+
+      - name: Build signed IPA
+        env:
+          IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
+          IOS_KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+        run: bash scripts/publish-ios.sh
+
+      - name: Save IPA
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ios-${{ env.IOS_VERSION_NAME }}-${{ env.IOS_BUILD_NUMBER }}
+          path: artifacts/ios-release.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload to App Store Connect
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          # altool 透過 API_PRIVATE_KEYS_DIR 尋找 API 私鑰，結束後清除。
+          export API_PRIVATE_KEYS_DIR
+          API_PRIVATE_KEYS_DIR=$(mktemp -d "$RUNNER_TEMP/adoubleb-api.XXXXXX")
+          trap 'rm -rf -- "$API_PRIVATE_KEYS_DIR"' EXIT
+          printf '%s' "$APP_STORE_CONNECT_PRIVATE_KEY" > "$API_PRIVATE_KEYS_DIR/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+          xcrun altool --upload-app --type ios --file artifacts/ios-release.ipa \
+            --apiKey "$APP_STORE_CONNECT_KEY_ID" --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+
+      - name: Write summary
+        run: |
+          printf '## iOS 已上傳 App Store Connect\n版本：%s；建置編號：%s\n請等待 Apple 處理，再到 TestFlight 分配測試群組。\n' \
+            "$IOS_VERSION_NAME" "$IOS_BUILD_NUMBER" >> "$GITHUB_STEP_SUMMARY"

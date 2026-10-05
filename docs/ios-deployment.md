@@ -2,7 +2,7 @@
 
 本文件針對 ADoubleB 的 iOS App，不是 Mac Catalyst 桌面 App。專案已包含 `net10.0-ios`，目前 Bundle ID 為 `com.companyname.adoubleb`。
 
-目前專案只有 Android 發布 workflow；以下是 iOS 的準備步驟與預定流程，**尚未建立 iOS workflow，因此現在推送 iOS 標籤不會部署**。
+專案已建立 `.github/workflows/ios-testflight.yml`，推送 `ios-v*` 標籤會建置並上傳 App Store Connect。Android 使用獨立的 `android-v*` 標籤。
 
 ## 1. 先理解流程
 
@@ -96,7 +96,7 @@ API 私鑰只能下載一次。Team API Key 的權限涵蓋團隊的 App，不�
 
 在 GitHub Repository 的 **Settings → Secrets and variables → Actions → Secrets → New repository secret** 逐一新增。
 
-以下名称是預定 iOS workflow 使用的名稱；新增 Secrets 本身不會執行部署。
+以下名稱是 iOS workflow 使用的名稱；新增 Secrets 本身不會執行部署。
 
 | Name | Secret 內容 |
 | --- | --- |
@@ -127,7 +127,16 @@ GitHub 官方流程：[在 macOS runner 安裝憑證與描述檔](https://docs.g
 
 ## 8. 建立符合專案的 iOS workflow
 
-完成上述準備後，再建立 `.github/workflows/ios-testflight.yml` 與建置腳本。實作時需確認：
+已建立 `.github/workflows/ios-testflight.yml`、`scripts/publish-ios.sh` 與 `scripts/ios-release.py`，目前設定如下：
+
+- 使用 `macos-26` runner、Xcode `26.6`、.NET SDK `10.0.401` 與 workload set `10.0.401`，固定相容版本。
+- 描述檔 UUID 與憑證 SHA-1 由描述檔解析，不需額外設定名稱。
+- 建置編號為 `IOS_BUILD_NUMBER_BASE + github.run_number`。Repository variable `IOS_BUILD_NUMBER_BASE` 未設定時使用 `0`，第一次執行為 `1`。
+- 如果 App Store Connect 已有建置，請在 GitHub Variables 設定起始值至少等於已使用的最大建置編號。本流程使用 1–9999 的整數編號。
+- 同一次執行重跑會使用相同建置編號；若 Apple 已接受該編號，請使用新標籤觸發下一次執行。
+- 使用 `xcrun altool` 與 API Key 上傳，不會自動送正式審核或新增 TestFlight 測試人員。
+
+後續維護需確認：
 
 - 使用 GitHub macOS runner，選擇符合 Apple 上傳要求、並與 .NET iOS workload 相容的 Xcode 版本；不要只依賴 runner 預設版本。
 - 安裝 .NET 10 與 iOS workload，限定 `TargetFrameworks=net10.0-ios`，避免同時還原 Mac Catalyst 等其他平台。

@@ -46,7 +46,7 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+	<PropertyGroup Condition="'$(Configuration)'=='Release' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
 		<AndroidPackageFormat>aab</AndroidPackageFormat>
 		<AndroidKeyStore>true</AndroidKeyStore>
 		<AndroidSigningKeyStore>ADoubleB.keystore</AndroidSigningKeyStore>
@@ -54,7 +54,7 @@
 	</PropertyGroup>
 
 	<!-- 簽署密碼由 Git 忽略的本機設定載入。 -->
-	<Import Project="Signing.local.props" Condition="Exists('Signing.local.props') and '$(Configuration)' == 'Release'" />
+	<Import Project="Signing.local.props" Condition="Exists('Signing.local.props') and '$(Configuration)' == 'Release' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
 
 	<ItemGroup>
 		<!-- 使用產生的猜數字 PNG 圖示，由 MAUI 縮放成各平台需要的尺寸。 -->
